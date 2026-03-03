@@ -73,7 +73,6 @@ fun SongListScreen(
     browseType: String,
     contextId: String?,
     title: String,
-    onSongPlayed: () -> Unit = {},
     viewModel: WearBrowseViewModel = hiltViewModel(),
     downloadsViewModel: WearDownloadsViewModel = hiltViewModel(),
     playerViewModel: WearPlayerViewModel = hiltViewModel(),
@@ -260,7 +259,6 @@ fun SongListScreen(
                                         contextType = contextType,
                                         contextId = playbackContextId,
                                     )
-                                    onSongPlayed()
                                 },
                                 onMenuClick = {
                                     selectedSongForMenu = song
@@ -303,7 +301,6 @@ fun SongListScreen(
                                 contextType = contextType,
                                 contextId = playbackContextId,
                             )
-                            onSongPlayed()
                             selectedSongForMenu = null
                         },
                         onPlayNext = {

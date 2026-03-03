@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalWearFoundationApi::class)
+
 package com.theveloper.pixelplay.presentation.screens
 
 import androidx.compose.animation.animateColorAsState
@@ -26,8 +28,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.geometry.Offset
@@ -39,9 +43,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.wear.compose.foundation.ExperimentalWearFoundationApi
+import androidx.wear.compose.foundation.requestFocusOnHierarchyActive
+import androidx.wear.compose.foundation.rotary.rotaryScrollable
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
+import com.google.android.horologist.audio.ui.VolumeUiState
+import com.google.android.horologist.audio.ui.volumeRotaryBehavior
 import com.theveloper.pixelplay.presentation.components.WearTopTimeText
 import com.theveloper.pixelplay.presentation.theme.LocalWearPalette
 import com.theveloper.pixelplay.presentation.theme.screenBackgroundColor
@@ -76,10 +85,26 @@ fun VolumeScreen(
         label = "volumeProgress",
     )
     val background = palette.screenBackgroundColor()
+    val rotaryFocusRequester = remember { FocusRequester() }
+    val rotaryVolumeUiState = remember(volumeState.level, volumeState.max) {
+        VolumeUiState(
+            current = volumeState.level.coerceAtLeast(0),
+            max = volumeState.max.coerceAtLeast(0),
+            min = 0,
+        )
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .requestFocusOnHierarchyActive()
+            .rotaryScrollable(
+                behavior = volumeRotaryBehavior(
+                    volumeUiStateProvider = { rotaryVolumeUiState },
+                    onRotaryVolumeInput = viewModel::setActiveVolume,
+                ),
+                focusRequester = rotaryFocusRequester,
+            )
             .background(background),
     ) {
         CurvedVolumeIndicator(

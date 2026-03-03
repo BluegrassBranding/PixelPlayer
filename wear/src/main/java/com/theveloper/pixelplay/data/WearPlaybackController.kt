@@ -71,6 +71,12 @@ class WearPlaybackController @Inject constructor(
     fun cycleRepeat() = sendCommand(WearPlaybackCommand(WearPlaybackCommand.CYCLE_REPEAT))
     fun volumeUp() = sendVolumeCommand(WearVolumeCommand(WearVolumeCommand.UP))
     fun volumeDown() = sendVolumeCommand(WearVolumeCommand(WearVolumeCommand.DOWN))
+    fun setPhoneVolume(percent: Int) = sendVolumeCommand(
+        WearVolumeCommand(
+            direction = WearVolumeCommand.SET,
+            value = percent.coerceIn(0, 100),
+        )
+    )
     fun requestPhoneVolumeState() = sendVolumeCommand(WearVolumeCommand(WearVolumeCommand.QUERY))
 
     /** Play a song within its context queue (album, artist, playlist, etc.) */

@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 /**
  * ViewModel for the Wear player screen.
@@ -312,6 +313,30 @@ class WearPlayerViewModel @Inject constructor(
             stateRepository.nudgePhoneVolumeLevel(delta = -1)
             playbackController.volumeDown()
         }
+    }
+
+    fun setActiveVolume(level: Int) {
+        if (isWatchOutputSelected.value) {
+            volumeRepository.setWatchVolume(level)
+            return
+        }
+
+        val current = stateRepository.volumeState.value
+        val max = current.max
+        if (max <= 0) return
+
+        val targetLevel = level.coerceIn(0, max)
+        val targetPercent = ((targetLevel.toFloat() / max.toFloat()) * 100f)
+            .roundToInt()
+            .coerceIn(0, 100)
+
+        stateRepository.updateVolumeState(
+            level = targetLevel,
+            max = max,
+            routeType = current.routeType,
+            routeName = current.routeName,
+        )
+        playbackController.setPhoneVolume(targetPercent)
     }
 
     fun refreshActiveVolumeState() {

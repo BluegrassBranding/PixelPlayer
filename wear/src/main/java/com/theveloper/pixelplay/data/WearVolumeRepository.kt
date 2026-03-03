@@ -101,6 +101,14 @@ class WearVolumeRepository @Inject constructor(
         refreshWatchVolumeState()
     }
 
+    fun setWatchVolume(level: Int) {
+        val max = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC).coerceAtLeast(0)
+        val targetLevel = level.coerceIn(0, max)
+        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, targetLevel, 0)
+        _watchVolumeState.value = _watchVolumeState.value.copy(level = targetLevel, max = max)
+        refreshWatchVolumeState()
+    }
+
     fun selectWatchAudioRoute(routeId: String) {
         scope.launch {
             val route = mediaRouter.routes.firstOrNull { candidate ->
