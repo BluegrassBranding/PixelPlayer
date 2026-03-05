@@ -690,8 +690,14 @@ constructor(
 
     private fun isSongUnchanged(raw: RawSongData, existing: SongEntity?): Boolean {
         if (existing == null) return false
-        if (existing.albumArtUriString != null && !existing.albumArtUriString.contains("song_art_${existing.id}")) {
-            return false
+        existing.albumArtUriString?.let { albumArtUriString ->
+            if (!albumArtUriString.contains("song_art_${existing.id}")) {
+                return false
+            }
+
+            if (!AlbumArtUtils.hasCachedAlbumArt(applicationContext, existing.id)) {
+                return false
+            }
         }
 
         val parentDir = File(raw.filePath).parent ?: ""

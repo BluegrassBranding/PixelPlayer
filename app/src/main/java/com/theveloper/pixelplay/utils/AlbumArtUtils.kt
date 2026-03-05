@@ -34,6 +34,13 @@ object AlbumArtUtils {
         return shareableCacheUri(appContext, cachedFile)
     }
 
+    fun hasCachedAlbumArt(
+        appContext: Context,
+        songId: Long
+    ): Boolean {
+        return albumArtCacheFile(appContext, songId).exists()
+    }
+
     /**
      * Enhanced embedded art extraction with better error handling
      */
