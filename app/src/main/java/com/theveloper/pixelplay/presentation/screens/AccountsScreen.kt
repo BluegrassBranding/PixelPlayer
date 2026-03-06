@@ -67,6 +67,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -209,7 +210,14 @@ fun AccountsScreen(
                                 preferNeteaseDashboard = true
                             )
                         },
-                        onLogout = { viewModel.logout(account.service) }
+                        onLogout = { viewModel.logout(account.service) },
+                        painter = if (account.service == ExternalServiceAccount.NETEASE) {
+                            painterResource(R.drawable.netease_cloud_music_logo_icon_206716__1_)
+                        } else if (account.service == ExternalServiceAccount.QQ_MUSIC) {
+                            painterResource(R.drawable.qq_music)
+                        } else if (account.service == ExternalServiceAccount.TELEGRAM) {
+                            painterResource(R.drawable.telegram)
+                        } else null
                     )
                 }
             } else {
@@ -322,7 +330,8 @@ private fun HeroStatTile(
 private fun ConnectedAccountCard(
     account: ExternalAccountUiModel,
     onManage: () -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    painter: androidx.compose.ui.graphics.painter.Painter? = null
 ) {
     val palette = servicePalette(account.service)
     val isComingSoon = account.service == ExternalServiceAccount.GOOGLE_DRIVE
@@ -339,66 +348,84 @@ private fun ConnectedAccountCard(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (account.service == ExternalServiceAccount.NAVIDROME) {
-                    ServiceIcon(
-                        service = account.service,
-                        tint = palette.iconTint,
-                        modifier = Modifier.width(48.dp).height(40.dp) // Narrower width for closer stack
-                    )
-                } else {
-                    Surface(
-                        shape = AbsoluteSmoothCornerShape(16.dp, 60),
-                        color = palette.iconContainer
-                    ) {
-                        ServiceIcon(
-                            service = account.service,
-                            tint = palette.iconTint,
-                            modifier = Modifier.padding(10.dp).size(20.dp)
-                        )
-                    }
-                }
-                Spacer(Modifier.size(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = account.title,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = account.accountLabel,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                Surface(
-                    shape = AbsoluteSmoothCornerShape(12.dp, 60),
-                    color = if (isComingSoon) {
-                        MaterialTheme.colorScheme.secondaryContainer
-                    } else {
-                        palette.statusContainer
-                    }
-                ) {
-                    Text(
-                        text = if (isComingSoon) "Soon" else "Connected",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = if (isComingSoon) {
-                            MaterialTheme.colorScheme.onSecondaryContainer
-                        } else {
-                            palette.statusTint
-                        },
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                    )
-                }
+    modifier = Modifier.fillMaxWidth(),
+    verticalAlignment = Alignment.CenterVertically
+) {
+    if (account.service == ExternalServiceAccount.NAVIDROME) {
+        ServiceIcon(
+            service = account.service,
+            tint = palette.iconTint,
+            modifier = Modifier
+                .width(48.dp)
+                .height(40.dp)
+        )
+    } else {
+        Surface(
+            shape = AbsoluteSmoothCornerShape(16.dp, 60),
+            color = palette.iconContainer
+        ) {
+            if (painter != null) {
+                Icon(
+                    painter = painter,
+                    contentDescription = null,
+                    tint = palette.iconTint,
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .size(20.dp)
+                )
+            } else {
+                ServiceIcon(
+                    service = account.service,
+                    tint = palette.iconTint,
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .size(20.dp)
+                )
             }
+        }
+    }
+
+    Spacer(Modifier.size(12.dp))
+
+    Column(modifier = Modifier.weight(1f)) {
+        Text(
+            text = account.title,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            text = account.accountLabel,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+
+    Surface(
+        shape = AbsoluteSmoothCornerShape(12.dp, 60),
+        color = if (isComingSoon) {
+            MaterialTheme.colorScheme.secondaryContainer
+        } else {
+            palette.statusContainer
+        }
+    ) {
+        Text(
+            text = if (isComingSoon) "Soon" else "Connected",
+            style = MaterialTheme.typography.labelMedium,
+            color = if (isComingSoon) {
+                MaterialTheme.colorScheme.onSecondaryContainer
+            } else {
+                palette.statusTint
+            },
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+        )
+    }
+}
 
             Surface(
                 shape = AbsoluteSmoothCornerShape(14.dp, 60),
@@ -504,6 +531,12 @@ private fun EmptyAccountsCard(
 
             disconnectedServices.forEach { service ->
                 val isComingSoon = service == ExternalServiceAccount.GOOGLE_DRIVE
+                val painter = when (service) {
+                    ExternalServiceAccount.NETEASE -> painterResource(R.drawable.netease_cloud_music_logo_icon_206716__1_)
+                    ExternalServiceAccount.QQ_MUSIC -> painterResource(R.drawable.qq_music)
+                    ExternalServiceAccount.TELEGRAM -> painterResource(R.drawable.telegram)
+                    else -> null
+                }
                 FilledTonalButton(
                     onClick = { if (!isComingSoon) onConnect(service) },
                     enabled = !isComingSoon,
@@ -514,10 +547,18 @@ private fun EmptyAccountsCard(
                     ),
                     modifier = Modifier.fillMaxWidth().height(48.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Link,
-                        contentDescription = null
-                    )
+                    if (painter != null) {
+                        Icon(
+                            painter = painter,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Rounded.Link,
+                            contentDescription = null
+                        )
+                    }
                     Spacer(modifier = Modifier.size(8.dp))
                     Text(
                         text = if (isComingSoon) {
