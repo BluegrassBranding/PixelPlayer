@@ -1,4 +1,4 @@
-name: Build Phone APK (Release - Unsigned)
+name: Build Phone APK (Release - DEBUGGE)
 
 on:
   push:
